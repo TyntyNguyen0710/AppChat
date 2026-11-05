@@ -1,27 +1,27 @@
 import MessageItem from "./MessageItem.tsx";
 
-// GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES
+//data demo, data thực lấy từ API (GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES)
 const messages = [
-    {id: 1, name: 'ti', mes: 'Chào bạn nhé', createAt: '09:30'},
-    {id: 2, name: 'username', mes: 'Hello bạn', createAt: '09:31'},
+    { id: 1, name: 'ti', mes: 'Chào bạn nhé', createAt: '09:30' },
+    { id: 2, name: 'username', mes: 'Hello bạn', createAt: '09:31' },
 ];
 
-export function ChatWindow(){
-    return(
+export function ChatWindow() {
+    return (
         <div className='d-flex flex-column vh-100'>
             <div className='border-bottom p-3'>
                 <h5 className='mb-0'>ti</h5>
                 <small className='text-muted'>Offline</small>
             </div>
 
-            <div className='flex-grow-1 overflow-auto p-3 bg-light' style={{minHeight:0}}>
-                {messages.map((m)=>(
-                    <MessageItem key={m.id} message={m} isMe={m.name === 'username'}/>
+            <div className='flex-grow-1 overflow-auto p-3 bg-light' style={{ minHeight: 0 }}>
+                {messages.map((m) => (
+                    <MessageItem key={m.id} message={m} isMe={m.name === 'username'} />
                 ))}
             </div>
 
             <div className='border-top p-3 d-flex gap-2'>
-                <input type='text' className='form-control' placeholder='Nhập tin nhắn...'/>
+                <input type='text' className='form-control' placeholder='Nhập tin nhắn...' />
                 <button className='btn btn-primary'>Gửi</button>
             </div>
         </div>
