@@ -1,6 +1,6 @@
 import MessageItem from "./MessageItem.tsx";
 
-//data demo, data thực lấy từ API (GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES)
+//data demo, data thức lấy từ (GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES)
 const messages = [
     { id: 1, name: 'ti', mes: 'Chào bạn nhé', createAt: '09:30' },
     { id: 2, name: 'username', mes: 'Hello bạn', createAt: '09:31' },
