@@ -4,11 +4,13 @@ import {useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {logout} from "../store/slice/AuthSlice";
 import {clearConversations} from "../store/slice/ConversationSlice";
+import {setCurrent} from "../store/slice/ChatSlice";
 import {NewChat, CreateRoom, JoinRoom} from "./ChatActions";
 
 export function Sidebar(){
     const auth = useSelector((state:any)=>state.auth);
     const conversations = useSelector((state:any)=>state.conversation.list);
+    const current = useSelector((state:any)=>state.chat.current);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -18,9 +20,15 @@ export function Sidebar(){
 
     const handleLogout=()=>{
         send("LOGOUT");
+        localStorage.removeItem("session");
         dispatch(logout());
         dispatch(clearConversations());
+        dispatch(setCurrent(null));
         navigate("/login");
+    }
+
+    const isActive=(item:any)=>{
+        return current && current.name === item.name && current.type === item.type;
     }
 
     return(
@@ -43,7 +51,9 @@ export function Sidebar(){
                     <div className='text-center text-muted p-4'>Chưa có cuộc trò chuyện nào</div>
                 )}
                 {conversations.map((item:any)=>(
-                    <button key={item.type + item.name} className='list-group-item list-group-item-action'>
+                    <button key={item.type + item.name}
+                            className={'list-group-item list-group-item-action' + (isActive(item) ? ' active' : '')}
+                            onClick={()=>dispatch(setCurrent({name: item.name, type: item.type}))}>
                         <div className='d-flex justify-content-between align-items-center'>
                             <b>{item.name}</b>
                             <span className={'badge ' + (item.type === 1 ? 'bg-success' : 'bg-secondary')}>

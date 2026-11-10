@@ -8,7 +8,8 @@ const authSlice=createSlice({
         code: "",
         isLogin: false,
         error: "",
-        success: ""
+        success: "",
+        restoring: localStorage.getItem("session") !== null,
     },
     reducers: {
         setPendingUser: (state, action) => {
@@ -18,6 +19,7 @@ const authSlice=createSlice({
             state.user = state.pendingUser
             state.code = action.payload
             state.isLogin = true
+            state.restoring = false
             state.error = ""
         },
         logout: (state) => {
@@ -25,6 +27,7 @@ const authSlice=createSlice({
             state.pendingUser = ""
             state.code = ""
             state.isLogin = false
+            state.restoring = false
         },
         setError: (state, action) => {
             state.error = action.payload

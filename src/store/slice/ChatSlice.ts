@@ -3,6 +3,7 @@ import {createSlice} from "@reduxjs/toolkit";
 const chatSlice= createSlice({
     name: "chat",
     initialState: {
+        current: null as any,
         room: "",
         members: [],
         messages: [],
@@ -12,6 +13,17 @@ const chatSlice= createSlice({
         success: ""
     },
     reducers: {
+        setCurrent: (state, action) =>{
+    const item = action.payload
+    if(item && state.current && item.name === state.current.name && item.type === state.current.type){
+        return
+    }
+    state.current= item
+    state.messages= []
+    state.members= []
+    state.page= 1
+    state.error= ""
+},
         setRoom: (state, action) =>{
             state.room= action.payload
         },
@@ -39,5 +51,5 @@ const chatSlice= createSlice({
     }
 });
 
-export const {setRoom, setMembers, setMessages, setOnlineStatus, addMember, addMessage, setSuccess, setError}= chatSlice.actions;
+export const {setCurrent, setRoom, setMembers, setMessages, setOnlineStatus, addMember, addMessage, setSuccess, setError}= chatSlice.actions;
 export default chatSlice.reducer;
