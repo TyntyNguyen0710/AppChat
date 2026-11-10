@@ -1,3 +1,4 @@
+import {useSelector} from "react-redux";
 import MessageItem from "./MessageItem.tsx";
 
 //data demo, data thức lấy từ (GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES)
@@ -7,11 +8,21 @@ const messages = [
 ];
 
 export function ChatWindow() {
+    const current = useSelector((state:any)=>state.chat.current);
+
+    if(!current){
+        return (
+            <div className='vh-100 d-flex align-items-center justify-content-center text-muted'>
+                <h5>Chọn một cuộc trò chuyện để bắt đầu</h5>
+            </div>
+        )
+    }
+
     return (
         <div className='d-flex flex-column vh-100'>
             <div className='border-bottom p-3'>
-                <h5 className='mb-0'>ti</h5>
-                <small className='text-muted'>Offline</small>
+                <h5 className='mb-0'>{current.name}</h5>
+                <small className='text-muted'>{current.type === 1 ? 'Phòng chat' : 'Chat 1-1'}</small>
             </div>
 
             <div className='flex-grow-1 overflow-auto p-3 bg-light' style={{ minHeight: 0 }}>

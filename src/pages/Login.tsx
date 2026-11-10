@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {clearMessage, setError, setPendingUser} from "../store/slice/AuthSlice";
 
@@ -10,6 +10,7 @@ export function Login(){
     const auth = useSelector((state:any)=>state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(()=>{
         dispatch(clearMessage());
@@ -17,7 +18,7 @@ export function Login(){
 
     useEffect(()=>{
         if(auth.isLogin){
-            navigate("/");
+            navigate("/chat");
         }
     },[auth.isLogin]);
 
