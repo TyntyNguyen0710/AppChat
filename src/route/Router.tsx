@@ -1,6 +1,7 @@
 import {createBrowserRouter, Navigate} from "react-router-dom";
 import {Layout} from "./Layout";
 import {Error} from "./Error";
+import {RequireAuth} from "./RequireAuth";
 import {Login} from "../pages/Login";
 import {Register} from "../pages/Register";
 import {Chat} from "../pages/Chat";
@@ -24,8 +25,13 @@ export const router = createBrowserRouter([
                 element:<Register/>,
             },
             {
-                path:"chat",
-                element:<Chat/>,
+                element:<RequireAuth/>,
+                children:[
+                    {
+                        path:"chat",
+                        element:<Chat/>,
+                    }
+                ]
             }
         ]
     }
