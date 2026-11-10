@@ -3,7 +3,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {logout} from "../store/slice/AuthSlice";
-import {clearConversations} from "../store/slice/ConversationSlice";
 
 export function Sidebar(){
     const auth = useSelector((state:any)=>state.auth);
@@ -32,9 +31,9 @@ export function Sidebar(){
             </div>
 
             <div className='p-2 d-flex gap-2'>
-                <button className='btn btn-sm btn-outline-primary flex-fill'>Chat mới</button>
-                <button className='btn btn-sm btn-outline-success flex-fill'>Tạo phòng</button>
-                <button className='btn btn-sm btn-outline-secondary flex-fill'>Vào phòng</button>
+                <NewChat/>
+                <CreateRoom/>
+                <JoinRoom/>
             </div>
 
             <div className='list-group list-group-flush overflow-auto flex-grow-1' style={{minHeight:0}}>
