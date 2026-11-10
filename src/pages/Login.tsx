@@ -17,7 +17,7 @@ export function Login(){
 
     useEffect(()=>{
         if(auth.isLogin){
-            navigate("/");
+            navigate("/chat");
         }
     },[auth.isLogin]);
 

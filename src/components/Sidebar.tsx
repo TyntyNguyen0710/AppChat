@@ -1,23 +1,23 @@
+import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {logout} from "../store/slice/AuthSlice";
-import {NewChat, CreateRoom, JoinRoom} from "./ChatActions";
-
-// data demo, data thức lấy từ (GET_USER_LIST)
-const conversations = [
-    {name: 'LONG-room', type: 1, actionTime: '2026-11-02 10:00:00'},
-    {name: 'ti', type: 0, actionTime: '2026-11-02 09:30:00'},
-];
 
 export function Sidebar(){
     const auth = useSelector((state:any)=>state.auth);
+    const conversations = useSelector((state:any)=>state.conversation.list);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(()=>{
+        send("GET_USER_LIST");
+    },[]);
 
     const handleLogout=()=>{
         send("LOGOUT");
         dispatch(logout());
+        dispatch(clearConversations());
         navigate("/login");
     }
 
@@ -37,8 +37,11 @@ export function Sidebar(){
             </div>
 
             <div className='list-group list-group-flush overflow-auto flex-grow-1' style={{minHeight:0}}>
-                {conversations.map((item)=>(
-                    <button key={item.name} className='list-group-item list-group-item-action'>
+                {conversations.length === 0 && (
+                    <div className='text-center text-muted p-4'>Chưa có cuộc trò chuyện nào</div>
+                )}
+                {conversations.map((item:any)=>(
+                    <button key={item.type + item.name} className='list-group-item list-group-item-action'>
                         <div className='d-flex justify-content-between align-items-center'>
                             <b>{item.name}</b>
                             <span className={'badge ' + (item.type === 1 ? 'bg-success' : 'bg-secondary')}>

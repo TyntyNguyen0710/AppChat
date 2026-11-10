@@ -1,4 +1,4 @@
-import {createBrowserRouter} from "react-router-dom";
+import {createBrowserRouter, Navigate} from "react-router-dom";
 import {Layout} from "./Layout";
 import {Error} from "./Error";
 import {Login} from "../pages/Login";
@@ -13,7 +13,7 @@ export const router = createBrowserRouter([
         children:[
             {
                 index:true,
-                element:<Chat/>,
+                element:<Navigate to="/login" replace/>,
             },
             {
                 path:"login",
@@ -22,6 +22,10 @@ export const router = createBrowserRouter([
             {
                 path:"register",
                 element:<Register/>,
+            },
+            {
+                path:"chat",
+                element:<Chat/>,
             }
         ]
     }
