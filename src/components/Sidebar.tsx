@@ -3,6 +3,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {logout} from "../store/slice/AuthSlice";
+import {clearConversations} from "../store/slice/ConversationSlice";
+import {NewChat, CreateRoom, JoinRoom} from "./ChatActions";
 
 export function Sidebar(){
     const auth = useSelector((state:any)=>state.auth);

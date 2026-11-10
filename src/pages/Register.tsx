@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {send} from "../service/ChatSocket";
 import {clearMessage, setError} from "../store/slice/AuthSlice";
 
@@ -10,10 +10,17 @@ export function Register(){
     const [confirm, setConfirm] = useState("");
     const auth = useSelector((state:any)=>state.auth);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(()=>{
         dispatch(clearMessage());
     },[dispatch]);
+
+useEffect(()=>{
+    if(auth.success){
+        navigate("/login", {state: {registered: true}});
+    }
+},[auth.success]);
 
     const handleRegister=(e:any)=>{
         e.preventDefault();
@@ -42,7 +49,6 @@ export function Register(){
                         <div className='card-body p-4'>
                             <h3 className='text-center mb-4'>Đăng ký</h3>
                             {auth.error && <div className='alert alert-danger'>{auth.error}</div>}
-                            {auth.success && <div className='alert alert-success'>{auth.success}</div>}
                             <form onSubmit={handleRegister}>
                                 <div className='mb-3'>
                                     <label className='form-label'>Tên đăng nhập</label>
