@@ -3,9 +3,9 @@ import {send, onEvent} from "./ChatSocket";
 // 1. CREATE_ROOM
 export function createRoom(roomName: string) {
     if(!roomName.trim() || roomName.trim() == ""){
-        return send("CREATE_ROOM",
-            {name: roomName.trim()});
+        return;
     }
+    send("CREATE_ROOM", {name: roomName.trim()});
 }
 onEvent("CREATE_ROOM", (res)=>{
     if(res.status == "success"){
@@ -17,11 +17,11 @@ onEvent("CREATE_ROOM", (res)=>{
 });
 
 // 2. JOIN_ROOM
-export function joinRoom(roomId: string) {
-    if(!roomId.trim() || roomId.trim() == ""){
+export function joinRoom(roomName: string) {
+    if(!roomName.trim() || roomName.trim() == ""){
         return;
     }
-    send("JOIN_ROOM", {id: roomId.trim()});
+    send("JOIN_ROOM", {name: roomName.trim()});
 }
 onEvent("JOIN_ROOM", (res)=>{
     if(res.status == "success"){
@@ -37,7 +37,7 @@ export function outRoom(roomName: string) {
     if(!roomName.trim() || roomName.trim() == ""){
         return;
     }
-    send("LEAVE_ROOM", {id: roomName.trim()});
+    send("LEAVE_ROOM", {name: roomName.trim()});
 }
 onEvent("LEAVE_ROOM", (res)=>{
     if(res.status == "success"){
