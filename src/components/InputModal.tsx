@@ -23,7 +23,8 @@ export function InputModal(
         }
 
         // Xử lí nút Submit
-        const handleSubmit = () => {
+        const handleSubmit = (e) => {
+            e.preventDefault();
             let trimmedValue = value.trim();
             if(trimmedValue !== ""){
                 onSubmit(trimmedValue); 
