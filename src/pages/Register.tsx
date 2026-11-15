@@ -16,11 +16,11 @@ export function Register(){
         dispatch(clearMessage());
     },[dispatch]);
 
-useEffect(()=>{
-    if(auth.success){
-        navigate("/login", {state: {registered: true}});
-    }
-},[auth.success]);
+    useEffect(()=>{
+        if(auth.success){
+            navigate("/login", {state: {registered: true}});
+        }
+    },[auth.success]);
 
     const handleRegister=(e:any)=>{
         e.preventDefault();
