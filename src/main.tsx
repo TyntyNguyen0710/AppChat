@@ -5,6 +5,7 @@ import App from './App.tsx';
 import {store} from './store/Store';
 import './service/AuthHandler';
 import './service/ConversationHandler';
+import './service/ChatHandler';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -10,6 +10,7 @@ const chatSlice= createSlice({
         onlineStatus: {},
         page: 1,
         error: "",
+        notice: "",
         success: ""
     },
     reducers: {
@@ -47,9 +48,12 @@ const chatSlice= createSlice({
         },
         setError: (state, action) =>{
             state.error= action.payload
+        },
+        setNotice: (state, action) =>{
+            state.notice= action.payload
         }
     }
 });
 
-export const {setCurrent, setRoom, setMembers, setMessages, setOnlineStatus, addMember, addMessage, setSuccess, setError}= chatSlice.actions;
+export const {setCurrent, setRoom, setMembers, setMessages, setOnlineStatus, addMember, addMessage, setSuccess, setError, setNotice}= chatSlice.actions;
 export default chatSlice.reducer;
