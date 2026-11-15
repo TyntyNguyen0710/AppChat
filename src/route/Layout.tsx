@@ -14,9 +14,9 @@ export function Layout(){
         <div>
             {/* Các trang con */}
             <Outlet/>
-            <span className={'badge position-fixed bottom-0 end-0 m-2 ' + (connected ? 'bg-success' : 'bg-danger')}>
-                {connected ? 'Đã kết nối' : 'Mất kết nối'}
-            </span>
+            {!connected && (
+                <span className='badge bg-danger position-fixed top-0 end-0 m-2'>Mất kết nối</span>
+            )}
         </div>
     )
 }

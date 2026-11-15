@@ -6,6 +6,7 @@ import {logout} from "../store/slice/AuthSlice";
 import {clearConversations} from "../store/slice/ConversationSlice";
 import {setCurrent} from "../store/slice/ChatSlice";
 import {NewChat, CreateRoom, JoinRoom} from "./ChatActions";
+import {createRoom} from "../service/ChatHandler";
 
 export function Sidebar(){
     const auth = useSelector((state:any)=>state.auth);
@@ -42,7 +43,7 @@ export function Sidebar(){
 
             <div className='p-2 d-flex gap-2'>
                 <NewChat/>
-                <CreateRoom/>
+                <CreateRoom onCreateRoom={createRoom}/>
                 <JoinRoom/>
             </div>
 

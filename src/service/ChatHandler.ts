@@ -1,18 +1,24 @@
+import {store} from "../store/Store";
 import {send, onEvent} from "./ChatSocket";
+import {setCurrent, setMembers, setNotice} from "../store/slice/ChatSlice";
 
 // 1. CREATE_ROOM
 export function createRoom(roomName: string) {
     if(!roomName.trim() || roomName.trim() == ""){
         return;
     }
-    send("CREATE_ROOM", {name: roomName.trim()});
+    if(!send("CREATE_ROOM", {name: roomName.trim()})){
+        store.dispatch(setNotice("Chưa kết nối được tới server"));
+    }
 }
 onEvent("CREATE_ROOM", (res)=>{
-    if(res.status == "success"){
-        console.log("Tạo phòng thành công", res.data);
+    if(res.status === "success"){
+        store.dispatch(setCurrent({name: res.data.name, type: 1}));
+        store.dispatch(setMembers(res.data.user));
+        send("GET_USER_LIST");
     }
-    if(res.status == "error"){
-        console.error("Tạo phòng thất bại: " + res.mes);
+    if(res.status === "error"){
+        store.dispatch(setNotice(res.mes || "Không tạo được phòng"));
     }
 });
 
