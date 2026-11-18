@@ -21,7 +21,7 @@ export function Sidebar(){
 
     const handleLogout=()=>{
         send("LOGOUT");
-        localStorage.removeItem("session");
+        sessionStorage.removeItem("session");
         dispatch(logout());
         dispatch(clearConversations());
         dispatch(setCurrent(null));

@@ -9,7 +9,7 @@ const authSlice=createSlice({
         isLogin: false,
         error: "",
         success: "",
-        restoring: localStorage.getItem("session") !== null,
+        restoring: sessionStorage.getItem("session") !== null,
     },
     reducers: {
         setPendingUser: (state, action) => {

@@ -3,10 +3,10 @@ import {onEvent, onOpen, send} from "./ChatSocket";
 import {loginSuccess, logout, setError, setPendingUser, setSuccess} from "../store/slice/AuthSlice";
 
 function saveSession(user: string, code: string){
-    localStorage.setItem("session", JSON.stringify({user: user, code: code}));
+    sessionStorage.setItem("session", JSON.stringify({user: user, code: code}));
 }
 onOpen(()=>{
-    const saved = localStorage.getItem("session");
+    const saved = sessionStorage.getItem("session");
     if(!saved){
         return;
     }
@@ -38,7 +38,7 @@ onEvent("RE_LOGIN", (res)=>{
         store.dispatch(loginSuccess(res.data.RE_LOGIN_CODE));
         send("GET_USER_LIST");
     }else{
-        localStorage.removeItem("session");
+        sessionStorage.removeItem("session");
         store.dispatch(logout());
     }
 });
