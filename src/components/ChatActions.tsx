@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {setNotice} from '../store/slice/ChatSlice';
+import {useChat} from '../context/ChatContext';
 import {InputModal} from './InputModal';
 
 // 1. Component NewChat
@@ -31,9 +30,8 @@ export function NewChat({onNewChat}: {onNewChat?: (targetUser: string) => void})
 export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
     const [pending, setPending] = useState("");
-    const notice = useSelector((state:any)=>state.chat.notice);
-    const current = useSelector((state:any)=>state.chat.current);
-    const dispatch = useDispatch();
+    const chat = useChat();
+    const current = chat.current;
 
     // tao phong xong thi dong cua so tao phong
     useEffect(()=>{
@@ -44,15 +42,15 @@ export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) =>
     },[current]);
 
     const handleOpen = () => {
-        dispatch(setNotice(""));
+        chat.setNotice("");
         setIsOpen(true);
     }
     const handleClose = () => {
-        dispatch(setNotice(""));
+        chat.setNotice("");
         setIsOpen(false);
     }
     const handleCreateRoom = (roomName: string) => {
-        dispatch(setNotice(""));
+        chat.setNotice("");
         setPending(roomName);
         onCreateRoom?.(roomName);
     }
@@ -66,7 +64,7 @@ export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) =>
                 title="Tạo phòng chat nhiều người"
                 placeholder="Nhập tên phòng"
                 isOpen={isOpen}
-                error={notice}
+                error={chat.notice}
                 onClose={handleClose}
                 onSubmit={handleCreateRoom}
             />
@@ -77,21 +75,43 @@ export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) =>
 // 3. Component JoinRoom
 export function JoinRoom({onJoinRoom}: {onJoinRoom?: (roomName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
-    const handleJoinRoom = (roomName: string) => {
-        onJoinRoom?.(roomName);
+    const [pending, setPending] = useState("");
+    const chat = useChat();
+    const current = chat.current;
+
+    // vao phong xong thi dong cua so vao phong
+    useEffect(()=>{
+        if(pending && current && current.type === 1 && current.name === pending){
+            setIsOpen(false);
+            setPending("");
+        }
+    },[current, pending]);
+
+    const handleOpen = () => {
+        chat.setNotice("");
+        setIsOpen(true);
+    }
+    const handleClose = () => {
+        chat.setNotice("");
         setIsOpen(false);
+    }
+    const handleJoinRoom = (roomName: string) => {
+        chat.setNotice("");
+        setPending(roomName);
+        onJoinRoom?.(roomName);
     };
     return (
         <>
             <button className='btn btn-sm btn-outline-secondary flex-fill'
-                onClick={() => setIsOpen(true)}>
+                onClick={handleOpen}>
                 Vào phòng
             </button>
             <InputModal
                 title="Vào phòng chat nhiều người"
                 placeholder="Nhập tên phòng"
                 isOpen={isOpen}
-                onClose={() => setIsOpen(false)}
+                error={chat.notice}
+                onClose={handleClose}
                 onSubmit={handleJoinRoom}
             />
         </>

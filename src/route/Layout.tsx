@@ -1,14 +1,8 @@
-import {useEffect} from "react";
-import {useSelector} from "react-redux";
 import {Outlet} from "react-router-dom";
-import {connect} from "../service/ChatSocket";
+import {useConnected} from "../hooks/useConnected";
 
 export function Layout(){
-    const connected = useSelector((state:any)=>state.socket.connected);
-
-    useEffect(()=>{
-        connect().catch(()=>{});
-    },[]);
+    const connected = useConnected();
 
     return(
         <div>

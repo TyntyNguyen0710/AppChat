@@ -1,14 +1,32 @@
-import {useSelector} from "react-redux";
+import {useEffect, useRef, useState} from "react";
+import {useAuth} from "../context/AuthContext";
+import {useChat} from "../context/ChatContext";
 import MessageItem from "./MessageItem.tsx";
 
-//data demo, data thức lấy từ (GET_PEOPLE_CHAT_MES / GET_ROOM_CHAT_MES)
-const messages = [
-    { id: 1, name: 'ti', mes: 'Chào bạn nhé', createAt: '09:30' },
-    { id: 2, name: 'username', mes: 'Hello bạn', createAt: '09:31' },
-];
-
 export function ChatWindow() {
-    const current = useSelector((state:any)=>state.chat.current);
+    const auth = useAuth();
+    const chat = useChat();
+    const current = chat.current;
+    const [text, setText] = useState("");
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+    // Có tin mới thì cuộn xuống cuối
+    useEffect(()=>{
+        bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+    },[chat.messages.length]);
+
+    // Đổi cuộc trò chuyện thì xóa chữ đang gõ dở
+    useEffect(()=>{
+        setText("");
+    },[current?.name, current?.type]);
+
+    const handleSend = () => {
+        if(text.trim() === ""){
+            return;
+        }
+        chat.sendChat(current.type, current.name, text);
+        setText("");
+    }
 
     if(!current){
         return (
@@ -26,14 +44,19 @@ export function ChatWindow() {
             </div>
 
             <div className='flex-grow-1 overflow-auto p-3 bg-light' style={{ minHeight: 0 }}>
-                {messages.map((m) => (
-                    <MessageItem key={m.id} message={m} isMe={m.name === 'username'} />
+                {chat.error && <div className='alert alert-danger'>{chat.error}</div>}
+                {chat.messages.map((m:any, index:number) => (
+                    <MessageItem key={index} message={m} isMe={m.name === auth.user} showName={current.type === 1} />
                 ))}
+                <div ref={bottomRef}></div>
             </div>
 
             <div className='border-top p-3 d-flex gap-2'>
-                <input type='text' className='form-control' placeholder='Nhập tin nhắn...' />
-                <button className='btn btn-primary'>Gửi</button>
+                <input type='text' className='form-control' placeholder='Nhập tin nhắn...'
+                       value={text}
+                       onChange={(e) => setText(e.target.value)}
+                       onKeyDown={(e) => {if(e.key === "Enter") handleSend()}} />
+                <button className='btn btn-primary' onClick={handleSend}>Gửi</button>
             </div>
         </div>
     )

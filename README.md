@@ -17,5 +17,6 @@ src/
   pages/        Các trang: Login, Register, Chat
   components/   Các thành phần dùng trong trang
   service/      Kết nối socket (ChatSocket.ts)
-  store/        Redux store và các slice
+  context/      Quản lý dữ liệu: AuthContext, ChatContext
+  hooks/        Hook dùng chung: useConnected
 ```
