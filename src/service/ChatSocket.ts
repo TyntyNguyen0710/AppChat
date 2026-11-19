@@ -1,86 +1,107 @@
-import { store } from "../store/Store";
-import { setConnected } from "../store/slice/SocketSlice";
-
 const URL = "wss://chat.longapp.io.vn/chat/chat";
 
 let socket: WebSocket | null = null;
 let connecting: Promise<void> | null = null;
 
-// list const xử lý theo api, handlers["LOGIN"] = [fn1, fn2]
+//ham xu li du kien khi mo hoac dong ket noi
 const handlers: any = {};
 const openHandlers: any[] = [];
+const closeHandlers: any[] = [];
 
-export function onEvent(event: string, handler: (res: any) => void) {
-    if (!handlers[event]) {
+export function onEvent(event: string, handler: (res: any) => void){
+    if(!handlers[event]){
         handlers[event] = [];
     }
     handlers[event].push(handler);
+    return ()=>{
+        handlers[event] = handlers[event].filter((fn: any)=>fn !== handler);
+    };
 }
 
-export function onOpen(handler: () => void) {
+export function onOpen(handler: () => void){
     openHandlers.push(handler);
+    return ()=>{
+        const index = openHandlers.indexOf(handler);
+        if(index >= 0){
+            openHandlers.splice(index, 1);
+        }
+    };
 }
 
-export function connect() {
-    if (socket && socket.readyState === WebSocket.OPEN) {
+export function onClose(handler: () => void){
+    closeHandlers.push(handler);
+    return ()=>{
+        const index = closeHandlers.indexOf(handler);
+        if(index >= 0){
+            closeHandlers.splice(index, 1);
+        }
+    };
+}
+
+export function isConnected(){
+    return socket !== null && socket.readyState === WebSocket.OPEN;
+}
+
+export function connect(){
+    if(isConnected()){
         return Promise.resolve();
     }
-    if (connecting) {
+    if(connecting){
         return connecting;
     }
-    connecting = new Promise<void>((resolve, reject) => {
+    connecting = new Promise<void>((resolve, reject)=>{
         const ws = new WebSocket(URL);
-        ws.onopen = () => {
+        ws.onopen = ()=>{
             socket = ws;
             connecting = null;
-            store.dispatch(setConnected(true));
-            openHandlers.forEach((fn) => fn());
+            [...openHandlers].forEach((fn)=>fn());
             resolve();
         };
-        ws.onerror = () => {
+        ws.onerror = ()=>{
             connecting = null;
             reject();
         };
-        ws.onmessage = (e) => {
+        ws.onmessage = (e)=>{
             handleMessage(e.data);
         };
-        ws.onclose = () => {
-            if (socket === ws) {
+        ws.onclose = ()=>{
+            if(socket === ws){
                 socket = null;
             }
-            store.dispatch(setConnected(false));
-            setTimeout(() => {
-                connect().catch(() => { });
+            [...closeHandlers].forEach((fn)=>fn());
+            // Mất kết nối thì thử kết nối lại sau 3 giây
+            setTimeout(()=>{
+                connect().catch(()=>{});
             }, 3000);
         };
     });
     return connecting;
 }
 
-export function send(event: string, data?: any) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
+export function send(event: string, data?: any){
+    if(!socket || socket.readyState !== WebSocket.OPEN){
         return false;
     }
-    const payload: any = { event: event };
-    if (data) {
+    const payload: any = {event: event};
+    if(data){
         payload.data = data;
     }
     console.log("->", payload);
-    socket.send(JSON.stringify({ action: "onchat", data: payload }));
+    socket.send(JSON.stringify({action: "onchat", data: payload}));
     return true;
 }
 
-function handleMessage(raw: string) {
+function handleMessage(raw: string){
     let res: any;
-    try {
+    try{
         res = JSON.parse(raw);
-    } catch (e) {
+    }catch(e){
         console.log("Dữ liệu không phải JSON:", raw);
         return;
     }
     console.log("<-", res);
     const list = handlers[res.event];
-    if (list) {
-        list.forEach((fn: any) => fn(res));
+    if(list){
+        [...list].forEach((fn: any)=>fn(res));
     }
 }
