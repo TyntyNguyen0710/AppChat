@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useChat} from '../context/ChatContext';
 import {InputModal} from './InputModal';
+import { send } from '../service/ChatSocket';
 
 // 1. Component NewChat
 export function NewChat({onNewChat}: {onNewChat?: (userName: string) => void}) {
@@ -78,7 +79,7 @@ export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) =>
     }
     return (
         <>
-            <button className='btn btn-sm btn-primary flex-fill'
+            <button className='btn btn-sm btn-outline-primary flex-fill'
                 onClick={handleOpen}>
                 Tạo phòng
             </button>
@@ -143,9 +144,17 @@ export function JoinRoom({onJoinRoom}: {onJoinRoom?: (roomName: string) => void}
 // 4. Component OutRoom
 export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
+    const [pending, setPending] = useState("");
     const chat = useChat();
     const current = chat.current;
     const roomName = current.name;
+
+    useEffect(()=>{
+        if(pending && current && current.type === 1 && current.name === pending){
+            setIsOpen(false);
+            setPending("");
+        }
+    },[current]);
 
     const handleOpen = () => {
         chat.setNotice("");
@@ -178,4 +187,11 @@ export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
             />
         </>
         );
+}
+
+export function checkUserExist(userName: string){
+    if(!userName.trim() || userName.trim() == ""){
+        return;
+    }
+    send("CHAT_CHECK_USER_EXIST", {name: userName.trim()});
 }
