@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useChat} from '../context/ChatContext';
 import {InputModal} from './InputModal';
-import { send } from '../service/ChatSocket';
+import { ConfirmModal } from './ConfirmModal';
 
 // 1. Component NewChat
 export function NewChat({onNewChat}: {onNewChat?: (userName: string) => void}) {
@@ -144,17 +144,9 @@ export function JoinRoom({onJoinRoom}: {onJoinRoom?: (roomName: string) => void}
 // 4. Component OutRoom
 export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
-    const [pending, setPending] = useState("");
     const chat = useChat();
     const current = chat.current;
     const roomName = current.name;
-
-    useEffect(()=>{
-        if(pending && current && current.type === 1 && current.name === pending){
-            setIsOpen(false);
-            setPending("");
-        }
-    },[current]);
 
     const handleOpen = () => {
         chat.setNotice("");
@@ -177,21 +169,17 @@ export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
                 onClick={handleOpen}>
                 Rời phòng
             </button>
-            <InputModal
-                title="Rời phòng"
-                placeholder= {`Xác nhận rời khỏi phòng ${roomName}`}
-                isOpen={isOpen}
-                error={chat.notice}
-                onClose={handleClose}
-                onSubmit={handleOutRoom}
-            />
+            {isOpen && current.type === 1 && (
+                <ConfirmModal
+                    title="Rời phòng"
+                    message={`Bạn có chắc muốn rời khỏi phòng ${roomName}?`}
+                    isOpen={isOpen}
+                    error={chat.notice}
+                    onSubmit={handleOutRoom}
+                    onClose={handleClose}
+                />
+            )}
         </>
-        );
+    );
 }
 
-export function checkUserExist(userName: string){
-    if(!userName.trim() || userName.trim() == ""){
-        return;
-    }
-    send("CHAT_CHECK_USER_EXIST", {name: userName.trim()});
-}
