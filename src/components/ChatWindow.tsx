@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {useAuth} from "../context/AuthContext";
 import {useChat} from "../context/ChatContext";
 import MessageItem from "./MessageItem.tsx";
+import {OutRoom} from "./ChatActions";
 
 export function ChatWindow() {
     const auth = useAuth();
@@ -38,9 +39,14 @@ export function ChatWindow() {
 
     return (
         <div className='d-flex flex-column vh-100'>
-            <div className='border-bottom p-3'>
-                <h5 className='mb-0'>{current.name}</h5>
+            <div className='border-bottom p-3 d-flex justify-content-between align-items-center'>
+                <div>
+                     <h5 className='mb-0'>{current.name}</h5>
                 <small className='text-muted'>{current.type === 1 ? 'Phòng chat' : 'Chat 1-1'}</small>
+                </div>
+                <div>
+                    <OutRoom onOutRoom={chat.outRoom}/>
+                </div>  
             </div>
 
             <div className='flex-grow-1 overflow-auto p-3 bg-light' style={{ minHeight: 0 }}>

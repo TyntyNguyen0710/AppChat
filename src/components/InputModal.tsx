@@ -65,10 +65,10 @@ export function InputModal(
                             </div>
                             <div className='modal-footer'>
                                 <button className='btn btn-secondary' onClick={handleClose}>
-                                    Close
+                                    Hủy
                                 </button>
                                 <button className='btn btn-primary' onClick={handleSubmit}>
-                                    Submit
+                                    Xác nhận
                                 </button>
                             </div>
                         </div>
@@ -76,5 +76,5 @@ export function InputModal(
                 </div>
                 <div className='modal-backdrop fade show'></div>
             </>
-        );
+        )
     }

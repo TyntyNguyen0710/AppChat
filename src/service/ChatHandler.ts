@@ -1,6 +1,8 @@
 import {store} from "../store/Store";
 import {send, onEvent} from "./ChatSocket";
 import {setCurrent, setMembers, setNotice} from "../store/slice/ChatSlice";
+import {useAuth} from "../context/AuthContext";
+import {useChat} from "../context/ChatContext";
 
 // 1. CREATE_ROOM
 export function createRoom(roomName: string) {
@@ -40,12 +42,12 @@ onEvent("JOIN_ROOM", (res)=>{
 
 // 3. OUT_ROOM
 export function outRoom(roomName: string) {
-    if(!roomName.trim() || roomName.trim() == ""){
+    if(!roomName.trim() || roomName.trim() == "" || useChat().members.indexOf(useAuth().user) == 0){
         return;
     }
-    send("LEAVE_ROOM", {name: roomName.trim()});
+    send("OUT_ROOM", {name: roomName.trim()});
 }
-onEvent("LEAVE_ROOM", (res)=>{
+onEvent("OUT_ROOM", (res)=>{
     if(res.status == "success"){
         console.log("Rời khỏi phòng thành công", res.data);
     }
