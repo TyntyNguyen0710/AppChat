@@ -1,43 +1,40 @@
 import {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate} from "react-router-dom";
-import {send} from "../service/ChatSocket";
-import {clearMessage, setError} from "../store/slice/AuthSlice";
+import {useAuth} from "../context/AuthContext";
 
 export function Register(){
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
-    const auth = useSelector((state:any)=>state.auth);
-    const dispatch = useDispatch();
+    const auth = useAuth();
     const navigate = useNavigate();
 
     useEffect(()=>{
-        dispatch(clearMessage());
-    },[dispatch]);
+        auth.clearMessage();
+    },[]);
 
-useEffect(()=>{
-    if(auth.success){
-        navigate("/login", {state: {registered: true}});
-    }
-},[auth.success]);
+    useEffect(()=>{
+        if(auth.success){
+            navigate("/login", {state: {registered: true}});
+        }
+    },[auth.success]);
 
     const handleRegister=(e:any)=>{
         e.preventDefault();
         if(username.trim() === "" || password === ""){
-            dispatch(setError("Vui lòng nhập đầy đủ thông tin"));
+            auth.setError("Vui lòng nhập đầy đủ thông tin");
             return;
         }
         if(!/^\w+$/.test(username.trim())){
-            dispatch(setError("Tên đăng nhập chỉ gồm chữ cái, số và dấu gạch dưới"));
+            auth.setError("Tên đăng nhập chỉ gồm chữ cái, số và dấu gạch dưới");
             return;
         }
         if(password !== confirm){
-            dispatch(setError("Mật khẩu nhập lại không khớp"));
+            auth.setError("Mật khẩu nhập lại không khớp");
             return;
         }
-        if(!send("REGISTER", {user: username.trim(), pass: password})){
-            dispatch(setError("Chưa kết nối được tới server"));
+        if(!auth.register(username.trim(), password)){
+            auth.setError("Chưa kết nối được tới server");
         }
     }
 
@@ -65,7 +62,7 @@ useEffect(()=>{
                                 <button type='submit' className='btn btn-primary w-100'>Đăng ký</button>
                             </form>
                             <p className='text-center mt-3 mb-0'>
-                                Đã có tài khoản? <Link to='/login'>Đăng nhập</Link>
+                                Đã có tài khoản! <Link to='/login'>Đăng nhập</Link>
                             </p>
                         </div>
                     </div>

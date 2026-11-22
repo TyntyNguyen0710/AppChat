@@ -1,20 +1,17 @@
 import {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useLocation, useNavigate} from "react-router-dom";
-import {send} from "../service/ChatSocket";
-import {clearMessage, setError, setPendingUser} from "../store/slice/AuthSlice";
+import {useAuth} from "../context/AuthContext";
 
 export function Login(){
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const auth = useSelector((state:any)=>state.auth);
-    const dispatch = useDispatch();
+    const auth = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(()=>{
-        dispatch(clearMessage());
-    },[dispatch]);
+        auth.clearMessage();
+    },[]);
 
     useEffect(()=>{
         if(auth.isLogin){
@@ -25,12 +22,11 @@ export function Login(){
     const handleLogin=(e:any)=>{
         e.preventDefault();
         if(username.trim() === "" || password === ""){
-            dispatch(setError("Vui lòng nhập tên đăng nhập và mật khẩu"));
+            auth.setError("Vui lòng nhập tên đăng nhập và mật khẩu");
             return;
         }
-        dispatch(setPendingUser(username.trim()));
-        if(!send("LOGIN", {user: username.trim(), pass: password})){
-            dispatch(setError("Chưa kết nối được tới server"));
+        if(!auth.login(username.trim(), password)){
+            auth.setError("Chưa kết nối được tới server");
         }
     }
 
@@ -41,6 +37,7 @@ export function Login(){
                     <div className='card shadow-sm'>
                         <div className='card-body p-4'>
                             <h3 className='text-center mb-4'>Đăng nhập</h3>
+                            {location.state?.registered && !auth.error && <div className='alert alert-success'>Đăng ký thành công, hãy đăng nhập</div>}
                             {auth.error && <div className='alert alert-danger'>{auth.error}</div>}
                             <form onSubmit={handleLogin}>
                                 <div className='mb-3'>

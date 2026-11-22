@@ -1,8 +1,8 @@
-import {useSelector} from "react-redux";
 import {Navigate, Outlet} from "react-router-dom";
+import {useAuth} from "../context/AuthContext";
 
 export function RequireAuth(){
-    const auth = useSelector((state:any)=>state.auth);
+    const auth = useAuth();
 
     if(auth.isLogin){
         return <Outlet/>
