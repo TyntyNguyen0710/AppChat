@@ -1,25 +1,48 @@
 import {useEffect, useState} from 'react';
 import {useChat} from '../context/ChatContext';
 import {InputModal} from './InputModal';
+import { ConfirmModal } from './ConfirmModal';
 
 // 1. Component NewChat
-export function NewChat({onNewChat}: {onNewChat?: (targetUser: string) => void}) {
+export function NewChat({onNewChat}: {onNewChat?: (userName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
-    const handleNewChat = (targetUser: string) => {
-        onNewChat?.(targetUser);
+    const [pending, setPending] = useState("");
+    const chat = useChat();
+    const current = chat.current;
+
+    // tao phong xong thi dong cua so tao phong
+    useEffect(()=>{
+        if(pending && current && current.type === 0 && current.name === pending){
+            setIsOpen(false);
+            setPending("");
+        }
+    },[current]);
+
+    const handleOpen = () => {
+        chat.setNotice("");
+        setIsOpen(true);
+    }
+    const handleClose = () => {
+        chat.setNotice("");
         setIsOpen(false);
+    }
+    const handleNewChat = (userName: string) => {
+        chat.setNotice("");
+        setPending(userName);
+        onNewChat?.(userName);
     }
     return (
         <>
-            <button className='btn btn-sm btn-outline-primary flex-fill'
-                onClick={() => setIsOpen(true)}>
+            <button className='btn btn-sm btn-outline-success flex-fill'
+                onClick={handleOpen}>
                 Chat mới
             </button>
             <InputModal
-                title="Phòng chat 1-1"
+                title="Tạo phòng chat 1-1"
                 placeholder="Nhập tên người dùng"
                 isOpen={isOpen}
-                onClose={() => setIsOpen(false)}             
+                error={chat.notice}
+                onClose={handleClose}
                 onSubmit={handleNewChat}
             />
         </>
@@ -56,7 +79,7 @@ export function CreateRoom({onCreateRoom}: {onCreateRoom?: (roomName: string) =>
     }
     return (
         <>
-            <button className='btn btn-sm btn-outline-success flex-fill'
+            <button className='btn btn-sm btn-outline-primary flex-fill'
                 onClick={handleOpen}>
                 Tạo phòng
             </button>
@@ -117,3 +140,46 @@ export function JoinRoom({onJoinRoom}: {onJoinRoom?: (roomName: string) => void}
         </>
         );
 }
+
+// 4. Component OutRoom
+export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
+    const [isOpen, setIsOpen] = useState(false);
+    const chat = useChat();
+    const current = chat.current;
+    const roomName = current.name;
+
+    const handleOpen = () => {
+        chat.setNotice("");
+        setIsOpen(true);
+    }
+    const handleClose = () => {
+        chat.setNotice("");
+        setIsOpen(false);
+    }
+    const handleOutRoom = () => {
+        if(roomName.trim() === "" || !current)
+            return;
+        chat.setNotice("");
+        setIsOpen(false);
+        onOutRoom?.(roomName);
+    };
+    return (
+        <>
+            <button className='btn btn-danger btn-sm'
+                onClick={handleOpen}>
+                Rời phòng
+            </button>
+            {isOpen && current.type === 1 && (
+                <ConfirmModal
+                    title="Rời phòng"
+                    message={`Bạn có chắc muốn rời khỏi phòng ${roomName}?`}
+                    isOpen={isOpen}
+                    error={chat.notice}
+                    onSubmit={handleOutRoom}
+                    onClose={handleClose}
+                />
+            )}
+        </>
+    );
+}
+

@@ -69,6 +69,16 @@ export function ChatProvider({children}: any){
             }),
             onEvent("CREATE_ROOM", (res)=>{
                 if(res.status === "success"){
+                    selectConversation({name: res.data.name, type: 0});
+                    setMembers(res.data.user || []);
+                    loadConversations();
+                }
+                if(res.status === "error"){
+                    setNotice(res.mes || "Không tạo được phòng");
+                }
+            }),
+            onEvent("CREATE_ROOM", (res)=>{
+                if(res.status === "success"){
                     selectConversation({name: res.data.name, type: 1});
                     setMembers(res.data.user || []);
                     loadConversations();
@@ -130,6 +140,16 @@ export function ChatProvider({children}: any){
             selectConversation(null);
         }
     },[auth.isLogin]);
+
+    const newChat = (userName: string)=>{
+        const name = userName.trim();
+        if(name === ""){
+            return;
+        }
+        if(!send("CREATE_ROOM", {name: name})){
+            setNotice("Chưa kết nối được tới server");
+        }
+    }
 
     const createRoom = (roomName: string)=>{
         const name = roomName.trim();

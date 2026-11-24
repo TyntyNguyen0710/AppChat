@@ -27,7 +27,7 @@ export function Sidebar(){
             </div>
 
             <div className='p-2 d-flex gap-2'>
-                <NewChat/>
+                <NewChat onNewChat={chat.newChat}/>
                 <CreateRoom onCreateRoom={chat.createRoom}/>
                 <JoinRoom onJoinRoom={chat.joinRoom}/>
             </div>
