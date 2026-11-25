@@ -11,12 +11,10 @@ export function ChatWindow() {
     const [text, setText] = useState("");
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    // Có tin mới thì cuộn xuống cuối
     useEffect(()=>{
         bottomRef.current?.scrollIntoView({behavior: 'smooth'});
     },[chat.messages.length]);
 
-    // Đổi cuộc trò chuyện thì xóa chữ đang gõ dở
     useEffect(()=>{
         setText("");
     },[current?.name, current?.type]);
@@ -45,7 +43,7 @@ export function ChatWindow() {
                 <small className='text-muted'>{current.type === 1 ? 'Phòng chat' : 'Chat 1-1'}</small>
                 </div>
                 <div>
-                    <OutRoom onOutRoom={chat.outRoom}/>
+                    {current.type === 1 &&<OutRoom onOutRoom={chat.outRoom}/>}
                 </div>  
             </div>
 

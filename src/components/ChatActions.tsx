@@ -10,13 +10,13 @@ export function NewChat({onNewChat}: {onNewChat?: (userName: string) => void}) {
     const chat = useChat();
     const current = chat.current;
 
-    // tao phong xong thi dong cua so tao phong
+ // mo chat xong thi dong cua so nhap ten
     useEffect(()=>{
         if(pending && current && current.type === 0 && current.name === pending){
             setIsOpen(false);
             setPending("");
         }
-    },[current]);
+    },[current, pending]);
 
     const handleOpen = () => {
         chat.setNotice("");
@@ -38,7 +38,7 @@ export function NewChat({onNewChat}: {onNewChat?: (userName: string) => void}) {
                 Chat mới
             </button>
             <InputModal
-                title="Tạo phòng chat 1-1"
+                title="Chat với người dùng"
                 placeholder="Nhập tên người dùng"
                 isOpen={isOpen}
                 error={chat.notice}
@@ -146,7 +146,7 @@ export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
     const [isOpen, setIsOpen] = useState(false);
     const chat = useChat();
     const current = chat.current;
-    const roomName = current.name;
+    const roomName = current ? current.name : "";
 
     const handleOpen = () => {
         chat.setNotice("");
@@ -156,11 +156,10 @@ export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
         chat.setNotice("");
         setIsOpen(false);
     }
-    const handleOutRoom = () => {
+const handleOutRoom = () => {
         if(roomName.trim() === "" || !current)
             return;
         chat.setNotice("");
-        setIsOpen(false);
         onOutRoom?.(roomName);
     };
     return (
@@ -169,7 +168,7 @@ export function OutRoom({onOutRoom}: {onOutRoom?: (roomName: string) => void}) {
                 onClick={handleOpen}>
                 Rời phòng
             </button>
-            {isOpen && current.type === 1 && (
+            {isOpen && (
                 <ConfirmModal
                     title="Rời phòng"
                     message={`Bạn có chắc muốn rời khỏi phòng ${roomName}?`}
