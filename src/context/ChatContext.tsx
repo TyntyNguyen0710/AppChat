@@ -10,12 +10,15 @@ export function ChatProvider({children}: any){
     const [current, setCurrent] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
+    const [hasMore, setHasMore] = useState(false);
+    const [online, setOnline] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
 
-    //lay gia tri moi nhat upload len server khi ket noi
+    // giu gia tri moi nhat de cac ham nhan du lieu tu server doc duoc (khong bi cu)
     const userRef = useRef(auth.user);
     const currentRef = useRef<any>(null);
+    const pageRef = useRef(1);
     const pendingUser = useRef("");
     userRef.current = auth.user;
 
@@ -25,20 +28,51 @@ export function ChatProvider({children}: any){
         send("GET_USER_LIST");
     }
 
-    //xac nhan phien tro chuyen dang hoat dong
+    // lay lich su tin nhan cua cuoc tro chuyen, moi trang 50 tin
+    const loadHistory = (item: any, page: number)=>{
+        pageRef.current = page;
+        if(item.type === 1){
+            send("GET_ROOM_CHAT_MES", {name: item.name, page: page});
+        }else{
+            send("GET_PEOPLE_CHAT_MES", {name: item.name, page: page});
+        }
+    }
+
+    // dua lich su vao khung chat: trang 1 thi thay the, trang sau thi them len dau
+    const saveHistory = (list: any[])=>{
+        const sorted = [...list].sort((a:any, b:any)=>a.id - b.id);
+        setHasMore(list.length >= 50);
+        if(pageRef.current > 1){
+            setMessages((prev)=>{
+                const ids = new Set(prev.map((x:any)=>x.id));
+                return [...sorted.filter((x:any)=>!ids.has(x.id)), ...prev];
+            });
+        }else{
+            setMessages((prev)=>[...sorted, ...prev.filter((x:any)=>x.tmp)]);
+        }
+        setError("");
+    }
+
+    // chon cuoc tro chuyen va lay lich su, chon lai dung cuoc dang mo thi giu nguyen (tra ve false)
     const selectConversation = (item: any)=>{
         const cur = currentRef.current;
         if(item && cur && item.name === cur.name && item.type === cur.type){
-            return;
+            return false;
         }
         currentRef.current = item;
         setCurrent(item);
         setMessages([]);
         setMembers([]);
+        setHasMore(false);
+        setOnline(false);
         setError("");
+        if(item){
+            loadHistory(item, 1);
+        }
+        return true;
     }
 
-    // neu khong co tin gi thi them tin moi len server
+    // tin tam (hien ngay khi gui) duoc thay bang tin that server tra ve, khong co tin tam thi them tin moi
     const addMessage = (m: any)=>{
         setMessages((prev)=>{
             const index = prev.findIndex((x:any)=>x.tmp && x.name === m.name && x.to === m.to && x.mes === m.mes);
@@ -77,6 +111,11 @@ export function ChatProvider({children}: any){
                     setNotice(res.mes || "Không kiểm tra được người dùng");
                 }
             }),
+            onEvent("CHECK_USER_ONLINE", (res)=>{
+                if(res.status === "success"){
+                    setOnline(Boolean(res.data.status));
+                }
+            }),
             onEvent("CREATE_ROOM", (res)=>{
                 if(res.status === "success"){
                     selectConversation({name: res.data.name, type: 1});
@@ -89,7 +128,11 @@ export function ChatProvider({children}: any){
             }),
             onEvent("JOIN_ROOM", (res)=>{
                 if(res.status === "success"){
-                    selectConversation({name: res.data.name, type: 1});
+                    const room = {name: res.data.name, type: 1};
+                    // dang mo dung phong nay roi thi tai lai lich su
+                    if(!selectConversation(room)){
+                        loadHistory(room, 1);
+                    }
                     setMembers(res.data.user || []);
                     loadConversations();
                 }
@@ -104,6 +147,42 @@ export function ChatProvider({children}: any){
                 }
                 if(res.status === "error"){
                     setNotice(res.mes || "Không rời được phòng");
+                }
+            }),
+            onEvent("GET_ROOM_CHAT_MES", (res)=>{
+                const cur = currentRef.current;
+                if(!cur || cur.type !== 1){
+                    return;
+                }
+                if(res.status === "success"){
+                    // phan hoi cua phong khac (da chuyen phong) thi bo qua
+                    if(cur.name !== res.data.name){
+                        return;
+                    }
+                    setMembers(res.data.user || []);
+                    saveHistory(res.data.chatMess || []);
+                }
+                if(res.status === "error"){
+                    setError(res.mes || "Không tải được tin nhắn");
+                }
+            }),
+            onEvent("GET_PEOPLE_CHAT_MES", (res)=>{
+                const me = userRef.current;
+                const cur = currentRef.current;
+                if(!cur || cur.type !== 0){
+                    return;
+                }
+                if(res.status === "success"){
+                    const list = res.data || [];
+                    // tin dau tien khong thuoc cuoc tro chuyen dang mo thi bo qua (phan hoi cu)
+                    const m = list[0];
+                    if(m && !((m.name === cur.name && m.to === me) || (m.name === me && m.to === cur.name))){
+                        return;
+                    }
+                    saveHistory(list);
+                }
+                if(res.status === "error"){
+                    setError(res.mes || "Không tải được tin nhắn");
                 }
             }),
             onEvent("SEND_CHAT", (res)=>{
@@ -133,7 +212,7 @@ export function ChatProvider({children}: any){
         return ()=>offs.forEach((off)=>off());
     },[]);
 
-    // khong con phien dang nhap thi xoa chat
+    // khong con phien dang nhap thi xoa du lieu chat
     useEffect(()=>{
         if(!auth.isLogin){
             setConversations([]);
@@ -154,6 +233,10 @@ export function ChatProvider({children}: any){
         if(!send("CHECK_USER_EXIST", {user: name})){
             setNotice("Chưa kết nối được tới server");
         }
+    }
+
+    const checkOnline = (userName: string)=>{
+        send("CHECK_USER_ONLINE", {user: userName});
     }
 
     const createRoom = (roomName: string)=>{
@@ -186,6 +269,13 @@ export function ChatProvider({children}: any){
         }
     }
 
+    // xem tin cu hon (trang tiep theo)
+    const loadMore = ()=>{
+        if(currentRef.current){
+            loadHistory(currentRef.current, pageRef.current + 1);
+        }
+    }
+
     const sendChat = (type: number, to: string, mes: string)=>{
         const content = mes.trim();
         if(content === ""){
@@ -196,13 +286,17 @@ export function ChatProvider({children}: any){
             setError("Chưa kết nối được tới server");
             return;
         }
-        // tra ve tin khi gui len server
+        // hien tin ngay khi gui, khi server tra ve thi thay bang tin that
         setMessages((prev)=>[...prev, {name: userRef.current, to: to, mes: content, type: type, createAt: now(), tmp: true}]);
+        // chat 1-1 server khong gui lai cho nguoi gui, tai lai danh sach cuoc tro chuyen hien ra
+        if(type !== 1){
+            loadConversations();
+        }
     }
 
     return(
-        <ChatContext.Provider value={{conversations, current, messages, members, error, notice, setNotice,
-            selectConversation, newChat, createRoom, joinRoom, outRoom, sendChat}}>
+        <ChatContext.Provider value={{conversations, current, messages, members, hasMore, online, error, notice, setNotice,
+            selectConversation, newChat, checkOnline, createRoom, joinRoom, outRoom, loadMore, sendChat}}>
             {children}
         </ChatContext.Provider>
     )
