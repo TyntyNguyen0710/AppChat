@@ -16,6 +16,7 @@ export function ChatProvider({children}: any){
     //lay gia tri moi nhat upload len server khi ket noi
     const userRef = useRef(auth.user);
     const currentRef = useRef<any>(null);
+    const pendingUser = useRef("");
     userRef.current = auth.user;
 
     const now = ()=>new Date().toLocaleString("sv-SE");
@@ -67,14 +68,13 @@ export function ChatProvider({children}: any){
                     setConversations(res.data);
                 }
             }),
-            onEvent("CREATE_ROOM", (res)=>{
-                if(res.status === "success"){
-                    selectConversation({name: res.data.name, type: 0});
-                    setMembers(res.data.user || []);
-                    loadConversations();
-                }
-                if(res.status === "error"){
-                    setNotice(res.mes || "Không tạo được phòng");
+            onEvent("CHECK_USER_EXIST", (res)=>{
+                if(res.status === "success" && res.data.status){
+                    selectConversation({name: pendingUser.current, type: 0});
+                }else if(res.status === "success"){
+                    setNotice("Người dùng không tồn tại");
+                }else{
+                    setNotice(res.mes || "Không kiểm tra được người dùng");
                 }
             }),
             onEvent("CREATE_ROOM", (res)=>{
@@ -146,7 +146,12 @@ export function ChatProvider({children}: any){
         if(name === ""){
             return;
         }
-        if(!send("CREATE_ROOM", {name: name})){
+        if(name === userRef.current){
+            setNotice("Không thể chat với chính mình");
+            return;
+        }
+        pendingUser.current = name;
+        if(!send("CHECK_USER_EXIST", {user: name})){
             setNotice("Chưa kết nối được tới server");
         }
     }
@@ -197,7 +202,7 @@ export function ChatProvider({children}: any){
 
     return(
         <ChatContext.Provider value={{conversations, current, messages, members, error, notice, setNotice,
-            selectConversation, createRoom, joinRoom, outRoom, sendChat}}>
+            selectConversation, newChat, createRoom, joinRoom, outRoom, sendChat}}>
             {children}
         </ChatContext.Provider>
     )
