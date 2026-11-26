@@ -35,8 +35,8 @@ export function AuthProvider({children}: any){
             send("RE_LOGIN", {user: session.user, code: session.code});
         }
 
-        const offs = [
-            // Cac phien ket noi thanh cong
+        const offs = [ 
+            // moi lan ket noi thanh cong (mo app, F5, noi lai sau khi mat mang)
             onOpen(restore),
             onEvent("REGISTER", (res)=>{
                 if(res.status === "success"){
@@ -55,7 +55,7 @@ export function AuthProvider({children}: any){
                     setSuccess("");
                 }
             }),
-            //sau khi relogin, luu tren server
+            // re-login thanh cong thi server tra ve code re-login, khi dang nhap xong luu lai de dung cho lan sau
             onEvent("RE_LOGIN", (res)=>{
                 if(res.status === "success"){
                     loginOk(res.data.RE_LOGIN_CODE);
