@@ -1,4 +1,5 @@
 const URL = "wss://chat.longapp.io.vn/chat/chat";
+const DEBUG = true;
 
 let socket: WebSocket | null = null;
 let connecting: Promise<void> | null = null;
@@ -86,7 +87,9 @@ export function send(event: string, data?: any){
     if(data){
         payload.data = data;
     }
-    console.log("->", payload);
+    if(DEBUG){
+        console.log("->", payload);
+    }
     socket.send(JSON.stringify({action: "onchat", data: payload}));
     return true;
 }
@@ -96,10 +99,13 @@ function handleMessage(raw: string){
     try{
         res = JSON.parse(raw);
     }catch(e){
-        console.log("Dữ liệu không phải JSON:", raw);
-        return;
+        if(DEBUG){
+            console.log("Dữ liệu không phải JSON:", raw);
+        }
     }
-    console.log("<-", res);
+    if(DEBUG){
+        console.log("<-", res);
+    }
     const list = handlers[res.event];
     if(list){
         [...list].forEach((fn: any)=>fn(res));
