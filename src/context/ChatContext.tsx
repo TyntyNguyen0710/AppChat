@@ -10,6 +10,7 @@ export function ChatProvider({children}: any){
     const [current, setCurrent] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
+    const [owner, setOwner]= useState("");
     const [hasMore, setHasMore] = useState(false);
     const [online, setOnline] = useState(false);
     const [error, setError] = useState("");
@@ -150,6 +151,7 @@ export function ChatProvider({children}: any){
                 }
             }),
             onEvent("GET_ROOM_CHAT_MES", (res)=>{
+                const me = userRef.current;
                 const cur = currentRef.current;
                 if(!cur || cur.type !== 1){
                     return;
@@ -159,8 +161,9 @@ export function ChatProvider({children}: any){
                     if(cur.name !== res.data.name){
                         return;
                     }
+                    setOwner(res.data.own || "")
                     setMembers(res.data.user || []);
-                    saveHistory(res.data.chatMess || []);
+                    saveHistory(res.data.chatData || []);
                 }
                 if(res.status === "error"){
                     setError(res.mes || "Không tải được tin nhắn");
@@ -295,7 +298,7 @@ export function ChatProvider({children}: any){
     }
 
     return(
-        <ChatContext.Provider value={{conversations, current, messages, members, hasMore, online, error, notice, setNotice,
+        <ChatContext.Provider value={{conversations, current, messages, members, owner, hasMore, online, error, notice, setNotice,
             selectConversation, newChat, checkOnline, createRoom, joinRoom, outRoom, loadMore, sendChat}}>
             {children}
         </ChatContext.Provider>

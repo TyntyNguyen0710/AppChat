@@ -54,7 +54,14 @@ export function ChatWindow() {
         <div className='d-flex flex-column vh-100'>
             <div className='border-bottom p-3 d-flex justify-content-between align-items-center'>
                 <div>
-                    <h5 className='mb-0'>{current.name}</h5>
+                    <h5 className='mb-0'>
+                        {current.name}
+                        {auth.user === chat.owner && current.type === 1 &&
+                        <span className="badge rounded-pill bg-info text-white ms-2">
+                            Chủ phòng
+                        </span>
+                    }
+                    </h5>
                     {current.type === 1 ? (
                         <small className='text-muted'>Phòng chat</small>
                     ) : (
