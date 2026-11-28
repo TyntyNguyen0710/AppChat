@@ -79,7 +79,14 @@ export function ChatWindow() {
                 {chat.error && <div className='alert alert-danger'>{chat.error}</div>}
                 {chat.hasMore && (
                     <div className='text-center mb-2'>
-                        <button className='btn btn-sm btn-outline-primary' onClick={chat.loadMore}>Xem tin cũ hơn</button>
+                        <button className='btn btn-sm btn-outline-primary' onClick={chat.loadMore}>
+                            Xem tin cũ hơn</button>
+                    </div>
+                )}
+                {chat.hasNewer && (
+                    <div className='text-center mb-2'>
+                        <button className='btn btn-sm btn-outline-primary' onClick={chat.loadNewer}>
+                            Xem tin mới hơn</button>
                     </div>
                 )}
                 {chat.messages.map((m:any, index:number) => (

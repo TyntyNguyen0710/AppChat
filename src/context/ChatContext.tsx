@@ -12,6 +12,7 @@ export function ChatProvider({children}: any){
     const [members, setMembers] = useState<any[]>([]);
     const [owner, setOwner]= useState("");
     const [hasMore, setHasMore] = useState(false);
+    const [hasNewer, setHasNewer] = useState(false);
     const [online, setOnline] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
@@ -32,6 +33,8 @@ export function ChatProvider({children}: any){
     // lay lich su tin nhan cua cuoc tro chuyen, moi trang 50 tin
     const loadHistory = (item: any, page: number)=>{
         pageRef.current = page;
+        if(page>=2) setHasNewer(true);
+        else setHasNewer(false);
         if(item.type === 1){
             send("GET_ROOM_CHAT_MES", {name: item.name, page: page});
         }else{
@@ -40,17 +43,11 @@ export function ChatProvider({children}: any){
     }
 
     // dua lich su vao khung chat: trang 1 thi thay the, trang sau thi them len dau
+    // -> Phân ra hiển thị mỗi trang 50 tin
     const saveHistory = (list: any[])=>{
         const sorted = [...list].sort((a:any, b:any)=>a.id - b.id);
         setHasMore(list.length >= 50);
-        if(pageRef.current > 1){
-            setMessages((prev)=>{
-                const ids = new Set(prev.map((x:any)=>x.id));
-                return [...sorted.filter((x:any)=>!ids.has(x.id)), ...prev];
-            });
-        }else{
-            setMessages((prev)=>[...sorted, ...prev.filter((x:any)=>x.tmp)]);
-        }
+        setMessages(sorted);
         setError("");
     }
 
@@ -101,6 +98,7 @@ export function ChatProvider({children}: any){
             onEvent("GET_USER_LIST", (res)=>{
                 if(res.status === "success"){
                     setConversations(res.data);
+                    console.log(JSON.stringify(res, null, 2));
                 }
             }),
             onEvent("CHECK_USER_EXIST", (res)=>{
@@ -205,6 +203,7 @@ export function ChatProvider({children}: any){
                         addMessage({...m, createAt: m.createAt || now()});
                     }
                     loadConversations();
+                    console.log(JSON.stringify(res, null, 2));
                 }
                 if(res.status === "error"){
                     setMessages((prev)=>prev.filter((x:any)=>!x.tmp));
@@ -279,6 +278,13 @@ export function ChatProvider({children}: any){
         }
     }
 
+    // xem tin nhan moi hon
+    const loadNewer = ()=>{
+        if(currentRef.current && pageRef.current>1){
+            loadHistory(currentRef.current, pageRef.current - 1);
+        }
+    }
+
     const sendChat = (type: number, to: string, mes: string)=>{
         const content = mes.trim();
         if(content === ""){
@@ -298,8 +304,8 @@ export function ChatProvider({children}: any){
     }
 
     return(
-        <ChatContext.Provider value={{conversations, current, messages, members, owner, hasMore, online, error, notice, setNotice,
-            selectConversation, newChat, checkOnline, createRoom, joinRoom, outRoom, loadMore, sendChat}}>
+        <ChatContext.Provider value={{conversations, current, messages, members, owner, hasMore, hasNewer, online, error, notice, setNotice,
+            selectConversation, newChat, checkOnline, createRoom, joinRoom, outRoom, loadMore, loadNewer, sendChat}}>
             {children}
         </ChatContext.Provider>
     )
